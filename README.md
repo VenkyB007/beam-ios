@@ -13,6 +13,12 @@ It is the iOS counterpart of `beam-android` and uses the same page bridge, plus 
 - **Google sign-in** goes through `ASWebAuthenticationSession` and Passport's `/app-auth` handoff
   (`SignInHandoff.swift`). This is the same PKCE flow as Android: Passport returns `ridewave://auth?code=…`, and the
   code + verifier are POSTed to `/app-auth/exchange` inside the web view.
+- **Ride mic.** `NSMicrophoneUsageDescription` plus a `requestMediaCapturePermissionFor` answer in
+  `WebViewController` let the page's `getUserMedia` (`public/js/voice.js`) open the microphone (1.7+).
+  iOS asks once. The mic still needs Beam on screen: there's no microphone background mode here yet.
+- **Download songs** (1.7+). An `<a download>` click on `/api/download/:id` becomes a `WKDownload`
+  (`Downloads.swift`) and the file lands in the app's Documents folder, which the Files app shows as
+  On My iPhone → Beam. No picker per song, so a whole playlist comes down in one go.
 - Links under `nikolatesla.co.in` stay in the app. Everything else opens in Safari or the matching app, and
   swiping back from the left edge goes back.
 - **No self-update.** iOS doesn't allow it. New builds reach phones through TestFlight or the App Store.

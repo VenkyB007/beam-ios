@@ -5,7 +5,8 @@ import WebKit
 /// music going in the pocket (background audio mode, AppDelegate), real lock-screen and headset
 /// buttons (NowPlaying), and Google sign-in, which Google refuses inside web views
 /// (SignInHandoff), and pausing for calls / other apps / headphones out like a music app
-/// (AudioFocus). The page reports what is playing through window.RideWaveApp.playback(json);
+/// (AudioFocus), the ride mic (microphone permission for the page) and saving songs to the Files
+/// app (Downloads). The page reports what is playing through window.RideWaveApp.playback(json);
 /// button presses come back through window.__rwNative(action) — the same bridge as Android.
 final class WebViewController: UIViewController {
 
@@ -16,6 +17,7 @@ final class WebViewController: UIViewController {
     private let nowPlaying = NowPlaying()
     private let audioFocus = AudioFocus()
     private let signIn = SignInHandoff()
+    private let downloads = Downloads()
 
     /// window.RideWaveApp for the page (public/js/native.js). No update(): TestFlight / the App
     /// Store update this app, so the page never offers the APK here.
@@ -125,6 +127,7 @@ final class WebViewController: UIViewController {
         audioFocus.onAction = { [weak self] action in self?.dispatch(action) }
         nowPlaying.onPlaying = { [weak self] playing in self?.audioFocus.pageState(playing: playing) }
         audioFocus.onChange = { [weak self] in self?.nowPlaying.reassert() }
+        downloads.note = { [weak self] msg in self?.dispatch("log:\(msg)") }
         progressWatch = webView.observe(\.estimatedProgress) { [weak self] _, _ in
             MainActor.assumeIsolated { self?.showProgress() } // KVO fires on the main thread
         }
@@ -208,6 +211,8 @@ extension WebViewController: WKNavigationDelegate {
         }
         // Embedded frames load in place; only where the whole app goes is our business.
         if action.targetFrame?.isMainFrame == false { return .allow }
+        // A song being saved (<a download> on /api/download): a file to keep, not a page to show.
+        if action.shouldPerformDownload && Self.isInApp(url) { return .download }
         if Self.isInApp(url) { return .allow } // the radio and sign-in stay in the app
         if SignInHandoff.isGoogleSignIn(url) {
             startSignIn()
@@ -215,6 +220,25 @@ extension WebViewController: WKNavigationDelegate {
         }
         openOutside(url)
         return .cancel
+    }
+
+    /// A file the page can't show (an attachment, or a type WebKit has no viewer for) is saved
+    /// instead of leaving a blank page: /api/download answers with Content-Disposition: attachment.
+    func webView(_ webView: WKWebView, decidePolicyFor response: WKNavigationResponse) async -> WKNavigationResponsePolicy {
+        guard response.isForMainFrame, let url = response.response.url, Self.isInApp(url) else { return .allow }
+        if !response.canShowMIMEType { return .download }
+        if let http = response.response as? HTTPURLResponse,
+           let disposition = http.value(forHTTPHeaderField: "Content-Disposition")?.lowercased(),
+           disposition.hasPrefix("attachment") { return .download }
+        return .allow
+    }
+
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = downloads
+    }
+
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        download.delegate = downloads
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
@@ -247,6 +271,16 @@ extension WebViewController: WKUIDelegate {
             if Self.isInApp(url) { webView.load(action.request) } else { openOutside(url) }
         }
         return nil
+    }
+
+    /// The ride mic (public/js/voice.js → getUserMedia). Our own page gets the microphone; iOS
+    /// still asks the person once, with NSMicrophoneUsageDescription from Info.plist. Without this
+    /// WebKit asks on every page load, and without the plist key iOS ends the app at the first tap.
+    func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin, initiatedByFrame frame: WKFrameInfo,
+                 type: WKMediaCaptureType, decisionHandler: @escaping (WKPermissionDecision) -> Void) {
+        guard type == .microphone, origin.protocol == "https",
+              let url = URL(string: "https://\(origin.host)"), Self.isInApp(url) else { return decisionHandler(.deny) }
+        decisionHandler(.grant)
     }
 }
 

@@ -25,6 +25,14 @@
 	<!-- Only standard HTTPS: no export-compliance question on every TestFlight upload. -->
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<!-- The ride mic (voice.js): iOS ends an app that opens the microphone without this. -->
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Beam uses the microphone so you can talk to the riders in your ride.</string>
+	<!-- Saved songs (Downloads.swift) go to Documents; these show that folder in the Files app as "On My iPhone → Beam". -->
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<!-- The music keeps playing with the screen locked or another app in front. -->
 	<key>UIBackgroundModes</key>
 	<array>
