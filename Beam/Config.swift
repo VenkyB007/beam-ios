@@ -1,17 +1,11 @@
 import UIKit
 
 enum Config {
-    /// The web app. Change this if the public hostname changes.
+    /// The web app. Since 1.9 beam. runs on the always-on server (AWS Lightsail), not the laptop.
     static let radioURL = URL(string: "https://beam.nikolatesla.co.in")!
-    /// The web app's previous address. Its page hops to radioURL carrying the phone's identity
-    /// (liked songs, playlists) and settings, so the first launch after the rename opens it once.
-    static let oldURL = URL(string: "https://kacheri.nikolatesla.co.in")!
-    static var startURL: URL {
-        let key = "movedToBeam"
-        if UserDefaults.standard.bool(forKey: key) { return radioURL }
-        UserDefaults.standard.set(true, forKey: key)
-        return oldURL
-    }
+    /// Where the app opens. (Until 1.8 a first launch visited kacheri. once so its page could hop
+    /// the phone's library to beam.; kacheri. is gone now, so the app opens beam. directly.)
+    static var startURL: URL { radioURL }
     /// Passport: Google sign-in hands the session back to the app through it (SignInHandoff).
     static let authURL = URL(string: "https://auth.nikolatesla.co.in")!
     /// Sign-in and the radio live under this domain; everything else opens outside the app.

@@ -1,6 +1,8 @@
 # Beam iOS
 
-iPhone shell around the Beam web app (formerly Kacheri) (repo `D:\apps\beam`) at `https://beam.nikolatesla.co.in`.
+iPhone shell around the Beam web app. Since 1.9 it opens **beam-cloud** (`D:\apps\beam-cloud`, always on) at
+`https://beam-cloud.nikolatesla.co.in` and signs in through Passport's `ridewave-cloud` handoff (`beamcloud://`).
+Until 1.8 it opened the home Beam (`D:\apps\beam`) at `https://beam.nikolatesla.co.in`.
 It is the iOS counterpart of `beam-android` and uses the same page bridge, plus what a web page can't do by itself:
 
 - **Plays in the background like a real music app.** `UIBackgroundModes: audio` and an

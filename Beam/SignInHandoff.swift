@@ -9,7 +9,7 @@ import UIKit
 ///
 ///  1. `start` makes a random verifier and opens an ASWebAuthenticationSession on
 ///     /app-auth/start with sha256(verifier) as the challenge.
-///  2. The person signs in there; Passport sends the sheet to `ridewave://auth?code=…`, which
+///  2. The person signs in there; Passport sends the sheet to `ridewave://auth?code=…` (Config.handoffScheme), which
 ///     the session catches and closes on.
 ///  3. The caller loads the returned request: code + verifier POSTed to /app-auth/exchange
 ///     inside the web view, so the session cookie is set in the app.
