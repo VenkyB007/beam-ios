@@ -41,7 +41,7 @@ Then set the team under Signing and run on a phone.
 ## One-time Apple setup (for TestFlight)
 
 1. Join the Apple Developer Program ($99/year).
-2. App Store Connect → Apps → **+** → new iOS app, bundle ID `in.co.nikolatesla.ridewave`, name "Beam".
+2. App Store Connect → Apps → **+** → new iOS app, bundle ID `in.co.nikolatesla.beam`, name "Beam".
 3. Users and Access → Integrations → App Store Connect API → generate a key with the **Admin** role.
    Admin lets the build create its distribution certificate and profile in the cloud.
 4. Add the repo secrets `APPLE_TEAM_ID`, `ASC_KEY_ID`, `ASC_ISSUER_ID` and `ASC_KEY_P8`

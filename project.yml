@@ -20,8 +20,7 @@ targets:
     settings:
       base:
         PRODUCT_NAME: Beam
-        # Same id as the Android app: the stores keep them apart.
-        PRODUCT_BUNDLE_IDENTIFIER: in.co.nikolatesla.ridewave
+        PRODUCT_BUNDLE_IDENTIFIER: in.co.nikolatesla.beam
         INFOPLIST_FILE: Beam/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         TARGETED_DEVICE_FAMILY: "1"
